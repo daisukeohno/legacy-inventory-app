@@ -10,6 +10,8 @@
     <form-bean name="orderForm" type="com.example.legacy.form.OrderForm"/>
   </form-beans>
 
+  <message-resources parameter="ApplicationResources"/>
+
   <global-forwards>
     <forward name="productList" path="/productList.do" redirect="true"/>
     <forward name="orderList" path="/orderList.do" redirect="true"/>
@@ -39,7 +41,7 @@
             name="productForm"
             scope="request"
             input="/jsp/productForm.jsp"
-            validate="false">
+            validate="true">
       <forward name="success" path="/productList.do" redirect="true"/>
       <forward name="failure" path="/jsp/productForm.jsp"/>
     </action>

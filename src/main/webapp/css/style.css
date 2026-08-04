@@ -1,0 +1,54 @@
+/* かなり古い書き方のCSS。テーブルレイアウト・インラインに近いスタイル。*/
+body {
+    font-family: "MS PGothic", "Osaka", sans-serif;
+    font-size: 13px;
+    color: #222222;
+    background-color: #f0f0f0;
+    margin: 10px;
+}
+
+h1 {
+    font-size: 18px;
+    color: #003366;
+}
+
+#navTable td {
+    padding-right: 8px;
+}
+
+table.dataTable {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #ffffff;
+}
+
+table.dataTable th {
+    background-color: #003366;
+    color: #ffffff;
+    padding: 4px 8px;
+    text-align: left;
+    font-size: 12px;
+}
+
+table.dataTable td {
+    border-bottom: 1px solid #cccccc;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.lowStock {
+    color: #cc0000;
+    font-weight: bold;
+}
+
+.errorBox {
+    background-color: #ffe0e0;
+    border: 1px solid #cc0000;
+    padding: 6px;
+    margin-bottom: 10px;
+    color: #990000;
+}
+
+.formTable td {
+    padding: 4px;
+}

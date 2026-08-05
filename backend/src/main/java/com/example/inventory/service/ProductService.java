@@ -21,11 +21,16 @@ public class ProductService {
      * キーワード(商品名/SKUの大文字小文字を無視した部分一致)と低在庫フラグで絞り込む。
      */
     public List<ProductDto> search(String keyword, boolean lowStockOnly) {
-        String normalized = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+        String normalized = (keyword == null || keyword.isBlank()) ? null : escapeLikePattern(keyword.trim());
         return productRepository.search(normalized, lowStockOnly, Product.LOW_STOCK_THRESHOLD)
                 .stream()
                 .map(ProductDto::from)
                 .toList();
+    }
+
+    /** LIKE のワイルドカードをリテラルとして扱う（旧実装の String.contains と同じ一致条件）。 */
+    private static String escapeLikePattern(String keyword) {
+        return keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
     public ProductDto findById(Integer id) {

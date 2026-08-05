@@ -25,7 +25,7 @@ export function OrderFormPage({ onDone }: Props) {
     () =>
       products.reduce((sum, product) => {
         const quantity = Number(quantities[product.id] ?? 0)
-        return Number.isFinite(quantity) && quantity > 0 ? sum + quantity * product.price : sum
+        return Number.isInteger(quantity) && quantity > 0 ? sum + quantity * product.price : sum
       }, 0),
     [products, quantities],
   )
@@ -106,6 +106,7 @@ export function OrderFormPage({ onDone }: Props) {
                     <input
                       type="number"
                       min={0}
+                      step={1}
                       className="qty"
                       value={quantities[product.id] ?? '0'}
                       onChange={(event) =>

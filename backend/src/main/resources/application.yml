@@ -18,12 +18,13 @@ spring:
         format_sql: false
   sql:
     init:
-      mode: always
+      # schema.sql は DROP TABLE から始まるため、組み込みDB以外では実行しない。
+      mode: ${SQL_INIT_MODE:embedded}
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
   h2:
     console:
-      enabled: true
+      enabled: ${H2_CONSOLE_ENABLED:false}
       path: /h2-console
 
 app:

@@ -54,8 +54,8 @@ export function OrderListPage({ onCreate }: Props) {
                 </td>
                 <td data-label="明細">
                   <ul className="item-list">
-                    {order.items.map((item) => (
-                      <li key={`${order.id}-${item.productId}-${item.quantity}`}>
+                    {order.items.map((item, index) => (
+                      <li key={`${order.id}-${index}`}>
                         <span>{item.productName}</span>
                         <span>× {item.quantity}</span>
                         <span>= {formatYen(item.subtotal)}</span>

@@ -52,6 +52,10 @@ cd backend
 DB接続情報・CORS 許可オリジンは環境変数で上書きできる
 （`DB_URL` / `DB_USERNAME` / `DB_PASSWORD` / `DB_DRIVER` / `CORS_ALLOWED_ORIGINS`）。
 
+`schema.sql` は `DROP TABLE` から始まるため、`spring.sql.init.mode` は既定で `embedded`（組み込みDBのときのみ実行）。
+永続DBに対して意図的に初期化したい場合のみ `SQL_INIT_MODE=always` を指定する。
+H2 コンソールは既定で無効で、`H2_CONSOLE_ENABLED=true` でのみ有効化される。
+
 ### フロントエンド
 
 ```bash

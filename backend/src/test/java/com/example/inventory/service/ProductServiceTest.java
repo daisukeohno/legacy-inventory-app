@@ -3,6 +3,7 @@ package com.example.inventory.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.inventory.dto.ProductDto;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,14 @@ class ProductServiceTest {
         assertThat(lowStock).allMatch(ProductDto::lowStock);
         assertThat(lowStock).extracting(ProductDto::sku)
                 .containsExactly("SKU-1002", "SKU-1003", "SKU-1005");
+    }
+
+    @Test
+    void treatsLikeWildcardsInKeywordAsLiterals() {
+        productService.create(new ProductDto(null, "SKU-50%", "50%OFF セール品", new BigDecimal("100"), 20, false));
+
+        assertThat(productService.search("_", false)).isEmpty();
+        assertThat(productService.search("50%", false)).extracting(ProductDto::sku).containsExactly("SKU-50%");
     }
 
     @Test

@@ -12,8 +12,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("""
             SELECT p FROM Product p
             WHERE (:keyword IS NULL
-                   OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                   OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                   OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) ESCAPE '\\'
+                   OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :keyword, '%')) ESCAPE '\\')
               AND (:lowStockOnly = FALSE OR p.stockQuantity < :threshold)
             ORDER BY p.id
             """)

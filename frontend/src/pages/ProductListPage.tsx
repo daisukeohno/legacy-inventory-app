@@ -12,7 +12,10 @@ export default function ProductListPage() {
   const load = (kw: string, low: boolean) => {
     api
       .listProducts(kw, low)
-      .then(setProducts)
+      .then((list) => {
+        setProducts(list);
+        setError(null);
+      })
       .catch((e: Error) => setError(e.message));
   };
 

@@ -71,6 +71,7 @@ export const api = {
     const query = params.toString();
     return request<Product[]>(`/api/products${query ? `?${query}` : ''}`);
   },
+  getProduct: (id: number) => request<Product>(`/api/products/${id}`),
   createProduct: (body: ProductRequest) =>
     request<Product>('/api/products', { method: 'POST', body: JSON.stringify(body) }),
   updateProduct: (id: number, body: ProductRequest) =>

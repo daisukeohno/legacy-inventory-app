@@ -75,6 +75,35 @@ class ProductControllerTest {
     }
 
     @Test
+    void getByIdReturnsProductAnd404WhenMissing() throws Exception {
+        given(productService.get(1L))
+                .willReturn(new Product("SKU-1001", "ノートPC", new BigDecimal("128000"), 24));
+        given(productService.get(999L))
+                .willThrow(new com.example.inventory.exception.NotFoundException("商品が見つかりません: id=999"));
+
+        mockMvc.perform(get("/api/products/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sku").value("SKU-1001"));
+
+        mockMvc.perform(get("/api/products/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void malformedJsonReturns400NotServerError() throws Exception {
+        mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"sku\":\"SKU-2001\",\"name\":\"新商品\",\"price\":1000,"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void unsupportedMethodReturns405NotServerError() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .delete("/api/products/1"))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
     void corsPreflightIsAllowedForConfiguredOriginAndRejectedOtherwise() throws Exception {
         mockMvc.perform(options("/api/products")
                         .header("Origin", "http://localhost:5173")

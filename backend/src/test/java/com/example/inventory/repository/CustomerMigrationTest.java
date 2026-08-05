@@ -44,6 +44,20 @@ class CustomerMigrationTest extends AbstractPostgresTest {
     }
 
     @Test
+    void customerNameIsUnique() {
+        Integer uniques = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.table_constraints "
+                        + "WHERE table_name = 'customer' AND constraint_name = 'uk_customer_name' "
+                        + "AND constraint_type = 'UNIQUE'", Integer.class);
+        assertThat(uniques).isEqualTo(1);
+
+        jdbcTemplate.update("INSERT INTO customer (name, email) VALUES ('一意制約テスト', NULL)");
+        assertThat(org.assertj.core.api.Assertions.catchThrowable(() ->
+                jdbcTemplate.update("INSERT INTO customer (name, email) VALUES ('一意制約テスト', NULL)")))
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+    }
+
+    @Test
     void foreignKeyConstraintExists() {
         Integer fks = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM information_schema.table_constraints "

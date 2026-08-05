@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api, type Product } from '../api';
 
@@ -12,6 +12,21 @@ export default function ProductFormPage() {
   const [price, setPrice] = useState(String(existing?.price ?? ''));
   const [stockQuantity, setStockQuantity] = useState(String(existing?.stockQuantity ?? ''));
   const [error, setError] = useState<string | null>(null);
+
+  // 一覧からの遷移では location.state が渡るが、URL 直打ちやリロード時は
+  // state が無いため単一取得 API から復元する。
+  useEffect(() => {
+    if (!id || existing) return;
+    api
+      .getProduct(Number(id))
+      .then((p) => {
+        setSku(p.sku);
+        setName(p.name);
+        setPrice(String(p.price));
+        setStockQuantity(String(p.stockQuantity));
+      })
+      .catch((e: Error) => setError(e.message));
+  }, [id, existing]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

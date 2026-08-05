@@ -82,7 +82,7 @@ jobs:
             | tr -d '\r' | grep -q "^Spring-Boot-Version: 3"
           # Flyway applied cleanly on PostgreSQL and ddl-auto=validate passed at startup.
           PGPASSWORD=inventory psql -h localhost -U inventory -d inventory -tAc \
-            "select count(*) from flyway_schema_history where success" | grep -qx 3
+            "select count(*) from flyway_schema_history where success" | grep -qx 4
           PGPASSWORD=inventory psql -h localhost -U inventory -d inventory -tAc \
             "select numeric_scale from information_schema.columns
               where table_name='product' and column_name='price'" | grep -qx 0

@@ -35,6 +35,12 @@ public class ProductController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public ProductResponse get(@PathVariable Long id) {
+        Product product = productService.get(id);
+        return ProductResponse.of(product, productService.isLowStock(product));
+    }
+
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         Product product = productService.create(request.sku(), request.name(),

@@ -48,6 +48,8 @@ public class OrderService {
         if (lines == null || lines.isEmpty()) {
             throw new IllegalArgumentException("少なくとも1つの商品を数量1以上で選択してください。");
         }
+        // customer.name は UNIQUE。同名の新規得意先が同時に登録された場合は
+        // 一意制約違反で注文全体がロールバックされる(重複行は作られない)。
         Customer customer = customerRepository.findByName(customerName.trim())
                 .orElseGet(() -> customerRepository.save(new Customer(customerName.trim(), null)));
 

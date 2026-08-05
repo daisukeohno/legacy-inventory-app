@@ -95,7 +95,7 @@ CORS は `app.cors.allowed-origins` に列挙したオリジンのみ許可し�
 ```bash
 cd backend && mvn clean verify      # 単体 + Testcontainers(PostgreSQL) 統合テスト (要 Docker)
 cd frontend && npm run build        # 型チェック + ビルド
-cd frontend && npx playwright test  # E2E (バックエンドとフロントの起動が必要)
+cd frontend && npx playwright install chromium && npx playwright test  # E2E (バックエンド起動が必要)
 ```
 
 E2E は商品検索 / 低在庫フィルタ / 商品登録 / 正常注文 / 在庫不足時の全ロールバックを画面経由で検証します。

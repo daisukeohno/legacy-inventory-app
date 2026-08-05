@@ -40,6 +40,7 @@ test('商品登録', async ({ page }) => {
   await page.waitForURL('**/products');
   await page.getByLabel('キーワード').fill(sku);
   await page.getByRole('button', { name: '検索' }).click();
+  await expect(page.getByTestId('product-row')).toHaveCount(1);
   await expect(page.getByTestId('product-row')).toContainText('1,234 円');
 });
 

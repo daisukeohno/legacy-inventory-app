@@ -1,0 +1,122 @@
+:root {
+  color-scheme: light;
+}
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  border-bottom: 1px solid #d7dbe0;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-header nav a {
+  margin-right: 1rem;
+  text-decoration: none;
+  color: #2b6cb0;
+}
+
+.app-header nav a.active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.stack label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+th.num,
+td.num {
+  text-align: right;
+}
+
+tr.low-stock {
+  background: #fff5f5;
+  color: #9b2c2c;
+}
+
+.badge {
+  margin-left: 0.5rem;
+  background: #c53030;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.total {
+  text-align: right;
+  font-weight: 700;
+}
+
+.error {
+  background: #fed7d7;
+  color: #822727;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+button,
+.button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #2b6cb0;
+  background: #2b6cb0;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button[type='button'] {
+  background: #fff;
+  color: #2b6cb0;
+}
+
+input {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+}

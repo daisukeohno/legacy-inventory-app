@@ -1,0 +1,82 @@
+package com.example.inventory.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/**
+ * 注文明細。商品名・単価は注文時点のスナップショットとして保持する(旧実装の仕様を維持)。
+ */
+@Entity
+@Table(name = "order_item")
+public class OrderItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+
+    @Column(name = "product_name", nullable = false, length = 200)
+    private String productName;
+
+    @Column(name = "unit_price", nullable = false, precision = 19, scale = 0)
+    private BigDecimal unitPrice;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    protected OrderItem() {
+    }
+
+    public OrderItem(Long productId, String productName, BigDecimal unitPrice, int quantity) {
+        this.productId = productId;
+        this.productName = productName;
+        this.unitPrice = unitPrice == null ? null : unitPrice.setScale(0, RoundingMode.HALF_UP);
+        this.quantity = quantity;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public BigDecimal getSubtotal() {
+        return unitPrice.multiply(BigDecimal.valueOf(quantity)).setScale(0, RoundingMode.HALF_UP);
+    }
+}

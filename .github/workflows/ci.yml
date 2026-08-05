@@ -77,8 +77,9 @@ jobs:
       - name: Assert the intended stack is actually running
         run: |
           set -euo pipefail
-          grep -q "Running with Spring Boot v3" /tmp/backend.log
-          grep -q "using Java 17" /tmp/backend.log
+          grep -q "Starting InventoryApplication using Java 17" /tmp/backend.log
+          unzip -p backend/target/inventory-app-1.0.0.jar META-INF/MANIFEST.MF \
+            | tr -d '\r' | grep -q "^Spring-Boot-Version: 3"
           # Flyway applied cleanly on PostgreSQL and ddl-auto=validate passed at startup.
           PGPASSWORD=inventory psql -h localhost -U inventory -d inventory -tAc \
             "select count(*) from flyway_schema_history where success" | grep -qx 3

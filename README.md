@@ -1,103 +1,80 @@
-# Legacy Inventory & Order Management System (Devin マイグレーションデモ用)
+# Inventory & Order Management System (Spring Boot + React)
 
-このリポジトリは、**Devinによるレガシーシステムのマイグレーション**をお客様にデモするための
-サンプルアプリケーションです。「古いJavaシステム → Spring Boot(モダンJava) + React/Vue」への
-移行ユースケースを想定しています。
+在庫・注文管理システム。旧実装（Struts 1.3.10 + JSP + 生JDBC / Java 7）を
+**Spring Boot 3 (Java 17) の REST API バックエンド + React (Vite/TypeScript) フロントエンド**へ移行したもの。
+業務要件（低在庫判定・商品検索・在庫引き落とし・注文確定・合計金額計算）は旧実装と同一。
 
-## 現状のシステム構成（移行元 / Before）
+## 構成
 
-| 項目 | 内容 |
+| ディレクトリ | 内容 |
 |---|---|
-| 言語 | Java 7 |
-| Webフレームワーク | Struts 1.3.10（2013年にEOL、セキュリティサポート終了） |
-| ビュー | JSP + Strutsタグ（bean/html/logic） |
-| データアクセス | 生JDBC（ORM未使用） |
-| DB | H2埋め込み(デモ用)。本番相当ではOracle/DB2等を想定 |
-| ビルド | Maven（`pom.xml`） |
-| 認証/サービス層 | なし（Action内に業務ロジックが直接記述） |
+| `backend/` | Spring Boot 3.3 / Java 17 / Spring Data JPA / H2 の REST API |
+| `frontend/` | Vite + React + TypeScript のシングルページアプリ |
 
-### 業務ドメイン
+### 旧実装からの対応関係
 
-在庫・注文管理（架空の商社を想定）。
+| Before (Struts 1) | After |
+|---|---|
+| `action/*Action` + `form/*Form` | `web/*Controller` + `dto/*` (Bean Validation) |
+| `dao/*Dao`（生JDBC） | `repository/*Repository`（Spring Data JPA） |
+| `Action` 内の業務ロジック | `service/ProductService`, `service/OrderService`（`@Transactional`） |
+| `DbUtil` のハードコード接続情報 | `application.yml`（環境変数で上書き可能） |
+| `DbInitListener` の DDL/seed | `src/main/resources/schema.sql` / `data.sql` |
+| JSP + Struts タグ | React コンポーネント（`frontend/src/pages`） |
+| `System.out.println` での握り潰し | `@RestControllerAdvice`（400 / 404 / 409 + エラーメッセージ JSON） |
 
-- 商品(在庫)の一覧・検索・低在庫フィルタ・登録・編集
-- 注文の一覧・新規作成（複数商品をまとめて注文、在庫引き落とし処理あり）
+在庫引き落とし（`ProductDao.decreaseStock`）と注文保存（`OrderDao.save`）が別トランザクションで
+片方だけ成功し得た旧実装のバグは、`OrderService.create` の単一トランザクションに統合して解消している。
 
-### 画面/機能一覧
+## 起動方法
 
-| 画面 | URL | 説明 |
-|---|---|---|
-| 商品一覧 | `/productList.do` | キーワード検索・低在庫のみ表示切替 |
-| 商品登録/編集 | `/productEdit.do`, `/productSave.do` | 新規登録・既存商品の編集 |
-| 注文一覧 | `/orderList.do` | 注文明細・合計金額を表示 |
-| 新規注文 | `/orderEdit.do`, `/orderSave.do` | 商品を選択し数量を入力して注文確定（在庫チェックあり） |
-
-## ローカルでの起動方法
+### バックエンド
 
 ```bash
-mvn tomcat7:run
+cd backend
+./mvnw spring-boot:run
 ```
 
-`http://localhost:8080/` にアクセス。初回起動時に `DbInitListener` がH2の埋め込みDBへ
-テーブル作成＋サンプルデータ投入を行います（再起動すると初期状態にリセットされます）。
+`http://localhost:8080` で起動し、起動時に H2 インメモリDBへスキーマ作成＋初期データ投入を行う
+（`schema.sql` / `data.sql`。再起動で初期状態にリセット）。
 
-> 社内のMavenリポジトリ/プロキシ経由でのビルドを想定しています。
-> 依存: `org.apache.struts:struts-core:1.3.10`, `struts-taglib:1.3.10`, `servlet-api:2.5`, `com.h2database:h2`
+主なエンドポイント:
 
-## このリポジトリにあえて残しているレガシーな課題点（Devinデモの見せ場）
+| メソッド | パス | 説明 |
+|---|---|---|
+| GET | `/api/products?keyword=&lowStockOnly=` | 商品一覧・検索（名前/SKUの部分一致、低在庫フィルタ） |
+| GET | `/api/products/{id}` | 商品取得 |
+| POST | `/api/products` | 商品登録 |
+| PUT | `/api/products/{id}` | 商品更新 |
+| GET | `/api/orders` | 注文一覧（明細・合計金額つき） |
+| POST | `/api/orders` | 注文確定（在庫チェック＋在庫引き落とし） |
 
-Devinにマイグレーションを依頼した際に「何を・なぜ直したか」を説明しやすくするため、
-典型的なレガシーコードのアンチパターンを意図的に残しています。
+DB接続情報・CORS 許可オリジンは環境変数で上書きできる
+（`DB_URL` / `DB_USERNAME` / `DB_PASSWORD` / `DB_DRIVER` / `CORS_ALLOWED_ORIGINS`）。
 
-1. **EOLフレームワーク/言語** : Struts 1（2013年EOL）+ Java 7（2022年サポート終了）
-2. **サービス層が存在しない** : 業務ロジック（在庫引き落とし・注文合計計算・検索条件の絞り込み）が
-   `Action`クラスや`Dao`クラスに直接書かれている（`OrderSaveAction`, `ProductDao.search()`）
-3. **生JDBC + ハードコードされた接続情報** : `DbUtil`にDB接続文字列・認証情報がベタ書き
-   （本来はDataSource/application.propertiesへ外部化すべき）
-4. **トランザクション境界が曖昧** : `OrderSaveAction`で注文保存と在庫引き落としが別コネクション・
-   別トランザクションになっており、片方だけ成功する不整合のリスクがある
-5. **例外を握りつぶすエラーハンドリング** : `System.out.println`でログ出力するだけで、
-   例外は呼び出し元に伝播しない
-6. **JSPに業務ロジック混在** : 低在庫判定の表示分岐やDIYな配列バインディング（`orderForm.jsp`の
-   `productIds[] / quantities[]`）がビューに漏れている
-7. **UI/UXが古い** : テーブルレイアウト、通貨フォーマットなし（"128000.0 円"のような生の数値表示）、
-   レスポンシブ対応なし
-8. **自動テストが一つもない**
+### フロントエンド
 
-## 移行先イメージ（After）
-
-- **バックエンド** : Spring Boot（Java 17 以降、Spring Boot対応バージョン）+ Spring Data JPA + REST API
-  - `Action`/`Form` → `@RestController` / DTO
-  - `Dao`（生JDBC） → Spring Data JPAの`Repository`
-  - 在庫引き落とし等の業務ロジック → `@Service` + `@Transactional`
-  - DB接続情報 → `application.yml`/環境変数化
-- **フロントエンド** : React（または Vue）の別フロントエンドアプリ + REST API連携
-  - JSP/Strutsタグ → コンポーネント化されたUI、通貨・日付の適切なフォーマット
-  - 旧UIと新UIを並べて見せることで「機能は同じだが体験が大きく改善する」ことを訴求できる
-- **テスト** : Service層・Repository層に対する自動テストを新規追加
-
-## Devinへの依頼プロンプト例
-
+```bash
+cd frontend
+npm install
+npm run dev
 ```
-このリポジトリ（Struts1 + JSP + 生JDBCの在庫・注文管理システム）を、
-以下の方針でマイグレーションしてください。
 
-1. バックエンドをSpring Boot（Java 17、REST API）に移行する
-   - Struts Action/Form を Controller/DTO に置き換える
-   - 生JDBCのDAOをSpring Data JPAのRepositoryに置き換える
-   - 在庫引き落とし・注文保存など業務ロジックをServiceクラスに切り出し、
-     @Transactionalでトランザクション境界を明確にする
-   - DB接続情報はapplication.ymlに外部化する（本番はH2ではなく想定DBに合わせる）
-2. フロントエンドをReactの別アプリとして新規実装し、REST API経由でバックエンドと連携する
-   - 商品一覧（検索・低在庫フィルタ）、商品登録/編集、注文一覧、新規注文の画面を実装
-   - 金額は3桁区切り＋円表記、在庫少は視覚的に強調する
-3. 既存の業務要件（在庫チェック、注文明細、合計金額計算）は変更せずに再現する
-4. 移行後のバックエンドに対する基本的な単体テストを追加する
+`http://localhost:5173` で起動。`/api` へのリクエストは Vite の dev プロキシ経由で
+`http://localhost:8080`（`VITE_BACKEND_URL` で変更可）へ転送される。
+Node.js は 20.19+ または 22 系が必要（`.nvmrc` は 22）。
 
-まずは移行計画（対象ファイル・作業ステップ・リスク）を提示してください。
+## テスト
+
+```bash
+cd backend
+./mvnw test
 ```
+
+- `OrderServiceTest`: 在庫チェック・在庫引き落とし・合計金額計算・在庫不足時のロールバック（注文も在庫も更新されない）
+- `ProductServiceTest`: キーワード部分一致・低在庫フィルタ
+- `ProductRepositoryTest`(`@DataJpaTest`): 在庫引き落としクエリ（在庫十分/不足）
 
 ## 免責事項
 
-本リポジトリはデモ・検証専用のサンプルです。認証・認可、入力値検証、監査ログなど
-本番運用に必要な要素は簡略化・省略されています。
+本リポジトリはデモ・検証専用のサンプルです。認証・認可、監査ログなど本番運用に必要な要素は簡略化・省略されています。

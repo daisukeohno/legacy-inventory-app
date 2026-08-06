@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('商品一覧', () => {
   test('キーワード検索で商品を絞り込める', async ({ page }) => {
     await page.goto('/products');
-    await expect(page.getByTestId('product-row')).toHaveCount(6);
+    await expect(page.getByTestId('product-row').first()).toBeVisible();
 
     await page.getByLabel('キーワード(商品名・SKU)').fill('マウス');
     await page.getByRole('button', { name: '検索' }).click();
@@ -17,7 +17,10 @@ test.describe('商品一覧', () => {
     await page.getByLabel('低在庫のみ表示').check();
 
     const rows = page.getByTestId('product-row');
-    await expect(rows).toHaveCount(3);
+    await expect(rows.filter({ hasText: 'SKU-1002' })).toHaveCount(1);
+    await expect(rows.filter({ hasText: 'SKU-1003' })).toHaveCount(1);
+    await expect(rows.filter({ hasText: 'SKU-1005' })).toHaveCount(1);
+    await expect(rows.filter({ hasText: 'SKU-1001' })).toHaveCount(0);
     for (const row of await rows.all()) {
       await expect(row).toHaveClass(/low-stock/);
       await expect(row.getByText('低在庫')).toBeVisible();

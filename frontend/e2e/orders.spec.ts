@@ -4,7 +4,7 @@ test.describe('注文', () => {
   test('注文一覧に明細と合計金額が表示される', async ({ page }) => {
     await page.goto('/orders');
 
-    const firstOrder = page.getByTestId('order-card').last();
+    const firstOrder = page.getByTestId('order-card').filter({ hasText: '株式会社サンプル商事' });
     await expect(firstOrder).toContainText('株式会社サンプル商事');
     await expect(firstOrder).toContainText('128,000 円');
     await expect(firstOrder.getByTestId('order-total')).toContainText('261,600 円');

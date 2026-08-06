@@ -1,0 +1,179 @@
+:root {
+  font-family: system-ui, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  color: #1f2933;
+  background: #f5f7fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+.app-header h1 {
+  font-size: 22px;
+  margin: 24px 0 12px;
+}
+
+.app-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid #d7dee7;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+}
+
+.app-header nav a {
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #34495e;
+  background: #e8edf3;
+  font-size: 14px;
+}
+
+.app-header nav a.active {
+  background: #2f6fed;
+  color: #fff;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e1e7ef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+label {
+  font-size: 14px;
+}
+
+input[type='text'],
+input[type='number'] {
+  padding: 8px 10px;
+  border: 1px solid #c4cdd8;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #2f6fed;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #e8edf3;
+  color: #34495e;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+th {
+  background: #f0f4f9;
+  font-weight: 600;
+}
+
+td.numeric,
+th.numeric {
+  text-align: right;
+}
+
+tr.low-stock {
+  background: #fff5f5;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #fde2e1;
+  color: #b02a1f;
+  font-weight: 600;
+}
+
+.error {
+  background: #fdecea;
+  border: 1px solid #f5c2bd;
+  color: #b02a1f;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.success {
+  background: #eaf7ee;
+  border: 1px solid #b7e0c4;
+  color: #1f7a3d;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  max-width: 360px;
+}
+
+.field-error {
+  color: #b02a1f;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.total {
+  text-align: right;
+  font-weight: 600;
+  margin-top: 8px;
+}

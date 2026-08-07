@@ -1,0 +1,176 @@
+:root {
+  font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: #1f2933;
+  background-color: #f5f7fa;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.app-header h1 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.app-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 2px solid #d3dce6;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+}
+
+.app-header nav a {
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #274472;
+  background: #e6ecf3;
+}
+
+.app-header nav a.active {
+  background: #274472;
+  color: #ffffff;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+input,
+select {
+  padding: 6px 8px;
+  border: 1px solid #b9c4d0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+button,
+.button-link {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 4px;
+  background: #274472;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button[type='button'] {
+  background: #7a8a9a;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(31, 41, 51, 0.12);
+}
+
+table.data-table th {
+  background: #274472;
+  color: #ffffff;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+table.data-table td {
+  border-bottom: 1px solid #e1e7ee;
+  padding: 8px 12px;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.numeric {
+  text-align: right;
+}
+
+.low-stock-row {
+  background: #fff5f5;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #c0392b;
+  color: #ffffff;
+  font-size: 11px;
+}
+
+.error {
+  background: #fdecea;
+  border: 1px solid #c0392b;
+  color: #922b21;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.form,
+.form-inline {
+  display: flex;
+  gap: 12px;
+}
+
+.form {
+  flex-direction: column;
+  max-width: 420px;
+}
+
+.form label,
+.form-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.form-inline {
+  max-width: 320px;
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.item-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.total {
+  font-weight: bold;
+}

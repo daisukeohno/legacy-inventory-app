@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:inventory;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+app:
+  inventory:
+    low-stock-threshold: 10
+  cors:
+    allowed-origins:
+      - http://localhost:5173

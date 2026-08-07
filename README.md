@@ -1,103 +1,127 @@
-# Legacy Inventory & Order Management System (Devin マイグレーションデモ用)
+# Inventory & Order Management System (Spring Boot 3 + React)
 
-このリポジトリは、**Devinによるレガシーシステムのマイグレーション**をお客様にデモするための
-サンプルアプリケーションです。「古いJavaシステム → Spring Boot(モダンJava) + React/Vue」への
-移行ユースケースを想定しています。
+在庫・注文管理システム（架空の商社を想定）。Struts 1.3 + JSP + 生JDBC + H2 の
+レガシー実装から、Spring Boot 3（Java 17 / REST API）+ React（Vite + TypeScript）へ
+マイグレーションしたモノレポです。**業務要件（在庫チェック・注文明細・合計金額計算）は
+変更せずに再現**しています。
 
-## 現状のシステム構成（移行元 / Before）
+## Before / After
 
-| 項目 | 内容 |
-|---|---|
-| 言語 | Java 7 |
-| Webフレームワーク | Struts 1.3.10（2013年にEOL、セキュリティサポート終了） |
-| ビュー | JSP + Strutsタグ（bean/html/logic） |
-| データアクセス | 生JDBC（ORM未使用） |
-| DB | H2埋め込み(デモ用)。本番相当ではOracle/DB2等を想定 |
-| ビルド | Maven（`pom.xml`） |
-| 認証/サービス層 | なし（Action内に業務ロジックが直接記述） |
-
-### 業務ドメイン
-
-在庫・注文管理（架空の商社を想定）。
-
-- 商品(在庫)の一覧・検索・低在庫フィルタ・登録・編集
-- 注文の一覧・新規作成（複数商品をまとめて注文、在庫引き落とし処理あり）
-
-### 画面/機能一覧
-
-| 画面 | URL | 説明 |
+| 項目 | Before（移行元） | After（本リポジトリ） |
 |---|---|---|
-| 商品一覧 | `/productList.do` | キーワード検索・低在庫のみ表示切替 |
-| 商品登録/編集 | `/productEdit.do`, `/productSave.do` | 新規登録・既存商品の編集 |
-| 注文一覧 | `/orderList.do` | 注文明細・合計金額を表示 |
-| 新規注文 | `/orderEdit.do`, `/orderSave.do` | 商品を選択し数量を入力して注文確定（在庫チェックあり） |
+| 言語 | Java 7 | Java 17 |
+| Webフレームワーク | Struts 1.3.10（2013年EOL） | Spring Boot 3（REST API） |
+| ビュー | JSP + Strutsタグ | React 19 + Vite + TypeScript |
+| データアクセス | 生JDBC（`ProductDao` / `OrderDao`） | Spring Data JPA（`ProductRepository` / `OrderRepository`） |
+| 業務ロジック | `Action` クラスに直書き | `@Service`（`ProductService` / `OrderService`） |
+| トランザクション | コネクション単位でバラバラ | `@Transactional` で注文単位に統一 |
+| DB | H2 埋め込み（起動毎にリセット） | PostgreSQL（本番ターゲット）/ H2（テスト） |
+| スキーマ管理 | `DbInitListener` にDDLベタ書き | Flyway（`backend/src/main/resources/db/migration`） |
+| DB接続情報 | `DbUtil` にハードコード | `application.yml` + 環境変数（`DB_URL` / `DB_USER` / `DB_PASSWORD`）、HikariCP |
+| 金額型 | `double` | `BigDecimal`（scale=0 / HALF_UP、DBは `NUMERIC(19,0)`） |
+| 注文日 / 状態 | `String` / `String` | `LocalDate` / enum `OrderStatus{NEW, SHIPPED}` |
+| 得意先 | `orders.customer_name` の自由記述 | `customer` エンティティ + FK（`orders.customer_id`） |
+| 入力検証 | `ActionForm.validate()` | Bean Validation（`@NotBlank` / `@PositiveOrZero` 等） |
+| 例外処理 | `catch(SQLException){ System.out.println(...) }` | `@RestControllerAdvice`（409/404/400）+ SLF4J |
+| 低在庫しきい値 | `Product.isLowStock()` に `10` 直書き | `app.inventory.low-stock-threshold`（既定10）を Service で判定 |
+| 金額表示 | `128000.0 円` | `128,000 円`（`Intl.NumberFormat('ja-JP')`）+ 在庫少バッジ |
+| テスト | なし | JUnit 5（Service / Repository / Controller）+ Testcontainers + Playwright E2E |
 
-## ローカルでの起動方法
+### 意図的な挙動変更（リグレッションではない）
+
+- **注文は全ロールバック**: 旧実装は在庫不足の直前までの商品の在庫を引き落としたまま
+  エラー画面を返していた。新実装は `@Transactional` により1商品でも在庫不足なら
+  注文全体を失敗させ、引き落とし済みの在庫も戻す（HTTP 409）。
+- **注文明細の送信形式**: 旧 `productIds[]` / `quantities[]` の並行配列から、
+  `items: [{ productId, quantity }]` のオブジェクト配列へ再設計（明細ずれの防止）。
+
+## リポジトリ構成
+
+```
+backend/    Spring Boot 3 REST API（Java 17 / Maven）
+frontend/   React + Vite + TypeScript（4画面）+ Playwright E2E
+docker-compose.yml  ローカル開発用 PostgreSQL
+```
+
+## ローカル起動
 
 ```bash
-mvn tomcat7:run
+# 1) PostgreSQL 起動（初回のみイメージ取得）
+docker compose up -d
+
+# 2) バックエンド（http://localhost:8080）
+cd backend
+mvn spring-boot:run
+#   起動時に Flyway がスキーマ作成 + シードデータ投入 + customer名寄せ移行を実行
+
+# 3) フロントエンド（http://localhost:5173）
+cd frontend
+npm install
+cp .env.example .env    # VITE_API_BASE_URL を必要に応じて変更
+npm run dev
 ```
 
-`http://localhost:8080/` にアクセス。初回起動時に `DbInitListener` がH2の埋め込みDBへ
-テーブル作成＋サンプルデータ投入を行います（再起動すると初期状態にリセットされます）。
+DB接続先は環境変数で上書きできます。
 
-> 社内のMavenリポジトリ/プロキシ経由でのビルドを想定しています。
-> 依存: `org.apache.struts:struts-core:1.3.10`, `struts-taglib:1.3.10`, `servlet-api:2.5`, `com.h2database:h2`
-
-## このリポジトリにあえて残しているレガシーな課題点（Devinデモの見せ場）
-
-Devinにマイグレーションを依頼した際に「何を・なぜ直したか」を説明しやすくするため、
-典型的なレガシーコードのアンチパターンを意図的に残しています。
-
-1. **EOLフレームワーク/言語** : Struts 1（2013年EOL）+ Java 7（2022年サポート終了）
-2. **サービス層が存在しない** : 業務ロジック（在庫引き落とし・注文合計計算・検索条件の絞り込み）が
-   `Action`クラスや`Dao`クラスに直接書かれている（`OrderSaveAction`, `ProductDao.search()`）
-3. **生JDBC + ハードコードされた接続情報** : `DbUtil`にDB接続文字列・認証情報がベタ書き
-   （本来はDataSource/application.propertiesへ外部化すべき）
-4. **トランザクション境界が曖昧** : `OrderSaveAction`で注文保存と在庫引き落としが別コネクション・
-   別トランザクションになっており、片方だけ成功する不整合のリスクがある
-5. **例外を握りつぶすエラーハンドリング** : `System.out.println`でログ出力するだけで、
-   例外は呼び出し元に伝播しない
-6. **JSPに業務ロジック混在** : 低在庫判定の表示分岐やDIYな配列バインディング（`orderForm.jsp`の
-   `productIds[] / quantities[]`）がビューに漏れている
-7. **UI/UXが古い** : テーブルレイアウト、通貨フォーマットなし（"128000.0 円"のような生の数値表示）、
-   レスポンシブ対応なし
-8. **自動テストが一つもない**
-
-## 移行先イメージ（After）
-
-- **バックエンド** : Spring Boot（Java 17 以降、Spring Boot対応バージョン）+ Spring Data JPA + REST API
-  - `Action`/`Form` → `@RestController` / DTO
-  - `Dao`（生JDBC） → Spring Data JPAの`Repository`
-  - 在庫引き落とし等の業務ロジック → `@Service` + `@Transactional`
-  - DB接続情報 → `application.yml`/環境変数化
-- **フロントエンド** : React（または Vue）の別フロントエンドアプリ + REST API連携
-  - JSP/Strutsタグ → コンポーネント化されたUI、通貨・日付の適切なフォーマット
-  - 旧UIと新UIを並べて見せることで「機能は同じだが体験が大きく改善する」ことを訴求できる
-- **テスト** : Service層・Repository層に対する自動テストを新規追加
-
-## Devinへの依頼プロンプト例
-
-```
-このリポジトリ（Struts1 + JSP + 生JDBCの在庫・注文管理システム）を、
-以下の方針でマイグレーションしてください。
-
-1. バックエンドをSpring Boot（Java 17、REST API）に移行する
-   - Struts Action/Form を Controller/DTO に置き換える
-   - 生JDBCのDAOをSpring Data JPAのRepositoryに置き換える
-   - 在庫引き落とし・注文保存など業務ロジックをServiceクラスに切り出し、
-     @Transactionalでトランザクション境界を明確にする
-   - DB接続情報はapplication.ymlに外部化する（本番はH2ではなく想定DBに合わせる）
-2. フロントエンドをReactの別アプリとして新規実装し、REST API経由でバックエンドと連携する
-   - 商品一覧（検索・低在庫フィルタ）、商品登録/編集、注文一覧、新規注文の画面を実装
-   - 金額は3桁区切り＋円表記、在庫少は視覚的に強調する
-3. 既存の業務要件（在庫チェック、注文明細、合計金額計算）は変更せずに再現する
-4. 移行後のバックエンドに対する基本的な単体テストを追加する
-
-まずは移行計画（対象ファイル・作業ステップ・リスク）を提示してください。
+```bash
+DB_URL=jdbc:postgresql://db.example:5432/inventory DB_USER=app DB_PASSWORD=*** mvn spring-boot:run
 ```
 
-## 免責事項
+## REST API
 
-本リポジトリはデモ・検証専用のサンプルです。認証・認可、入力値検証、監査ログなど
-本番運用に必要な要素は簡略化・省略されています。
+| メソッド | パス | 説明 |
+|---|---|---|
+| GET | `/api/products?keyword=&lowStockOnly=` | 商品検索（name/sku 部分一致・大文字小文字無視、低在庫フィルタ） |
+| GET | `/api/products/{id}` | 商品取得 |
+| POST | `/api/products` | 商品登録（201） |
+| PUT | `/api/products/{id}` | 商品更新 |
+| GET | `/api/customers` | 得意先一覧 |
+| GET | `/api/orders` | 注文一覧（明細・合計金額付き） |
+| POST | `/api/orders` | 注文確定（201 / 在庫不足は409） |
+
+エラーレスポンスは `{ timestamp, status, message, details[] }` 形式。
+バリデーション違反=400、リソース未存在=404、在庫不足=409。
+
+## 設定
+
+`backend/src/main/resources/application.yml`
+
+| キー | 既定値 | 説明 |
+|---|---|---|
+| `app.inventory.low-stock-threshold` | `10` | 低在庫と判定する在庫数のしきい値 |
+| `app.cors.allowed-origins` | `http://localhost:5173` | CORS 許可オリジン（APIは外部非公開前提） |
+| `DB_URL` / `DB_USER` / `DB_PASSWORD` | localhost の docker-compose 値 | DB接続情報（環境変数） |
+
+## データ移行（customer 名寄せ）
+
+`V3__customer_fk_migration.sql` で、旧 `orders.customer_name`（自由記述）を
+`customer` マスタへ名寄せします。
+
+1. `orders.customer_id` を nullable で追加
+2. `customer.name` との完全一致でバックフィル
+3. 未一致の得意先名は `customer` へ新規登録して紐付け
+4. `customer_id` を NOT NULL 化 + FK制約 `orders_customer_fk` 追加
+5. `customer_name` は互換のため非正規化コピーとして残置（将来削除）
+
+> 表記ゆれ（全角/半角・空白）があると完全一致に失敗し、別得意先として新規作成されます。
+> 本番データ移行時は事前にデータ確認を推奨します。
+
+## テスト
+
+```bash
+cd backend && mvn test          # 単体 + Repository + Controller + Testcontainers結合
+cd frontend && npm run lint     # 型チェック
+cd frontend && npm run build
+cd frontend && npx playwright test   # E2E（backend/frontend 起動が前提）
+```
+
+- 結合テストは Testcontainers の PostgreSQL に対して Flyway マイグレーション、
+  アトミック在庫UPDATE、在庫不足時の全ロールバックを検証します（Docker必須。
+  Docker が無い環境では自動スキップ）。
+
+## 将来拡張の余地（今回スコープ外）
+
+- 低在庫しきい値の商品ごと可変化（`product.low_stock_threshold` 列を追加し、
+  未設定時はグローバル設定へフォールバック）。判定は `ProductService.isLowStock()` に
+  集約済みのため拡張が容易。
+- 認証・認可は本リポジトリのスコープ外（APIは外部非公開前提）。

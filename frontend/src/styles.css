@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  background: #f5f6f8;
+  color: #1f2933;
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.app-header h1 {
+  font-size: 1.4rem;
+}
+
+.app-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-header nav a {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f2933;
+  text-decoration: none;
+  border: 1px solid #d3d8de;
+}
+
+.app-header nav a.active {
+  background: #1f6feb;
+  color: #fff;
+  border-color: #1f6feb;
+}
+
+.filters,
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.filters {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.entity-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 22rem;
+}
+
+input {
+  padding: 0.4rem;
+  border: 1px solid #d3d8de;
+  border-radius: 4px;
+}
+
+button {
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #1f6feb;
+  color: #fff;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eceff3;
+  text-align: left;
+}
+
+.data-table .numeric {
+  text-align: right;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.badge-low-stock {
+  background: #fdecea;
+  color: #b3261e;
+  border: 1px solid #f3b8b2;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.order-card .total {
+  text-align: right;
+  font-weight: 700;
+}
+
+.error {
+  background: #fdecea;
+  color: #b3261e;
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .data-table {
+    font-size: 0.85rem;
+  }
+}

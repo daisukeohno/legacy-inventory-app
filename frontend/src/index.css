@@ -1,0 +1,13 @@
+:root {
+  font-family: system-ui, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  color: #111827;
+  background: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

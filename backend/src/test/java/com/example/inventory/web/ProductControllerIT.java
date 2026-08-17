@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -52,6 +53,30 @@ class ProductControllerIT extends AbstractPostgresIntegrationTest {
     void getByIdReturns404ForUnknownProduct() throws Exception {
         mockMvc.perform(get("/api/products/9999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getByIdReturns400ForMalformedId() throws Exception {
+        mockMvc.perform(get("/api/products/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void unsupportedMethodReturns405() throws Exception {
+        mockMvc.perform(delete("/api/products"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405));
+    }
+
+    @Test
+    void createRoundsDecimalPriceToWholeYen() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "sku", "SKU-2002", "name", "小数価格商品", "price", "1200.5", "stockQuantity", 20));
+
+        mockMvc.perform(post("/api/products").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.price").value(1201));
     }
 
     @Test

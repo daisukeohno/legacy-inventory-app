@@ -55,10 +55,15 @@ test('商品を登録でき、入力不備はエラー表示になる', async ({
 
 test('注文一覧は明細と合計金額を表示する', async ({ page }) => {
   await page.goto('/orders')
-  const cards = page.getByTestId('order-card')
-  await expect(cards).not.toHaveCount(0)
+  await expect(page.getByTestId('order-card')).not.toHaveCount(0)
   // シード注文: ノートPC 128,000 x2 + ワイヤレスマウス 2,800 x2 = 261,600
-  await expect(cards.first().getByTestId('order-total')).toHaveText('261,600 円')
+  // 他テストが作る注文の影響を受けないよう、シード注文をテキストで特定する。
+  const seeded = page
+    .getByTestId('order-card')
+    .filter({ hasText: '株式会社サンプル商事' })
+    .first()
+  await expect(seeded).toContainText('ノートPC 14インチ')
+  await expect(seeded.getByTestId('order-total')).toHaveText('261,600 円')
 })
 
 test('新規注文を確定すると在庫が引き落とされる', async ({ page }) => {

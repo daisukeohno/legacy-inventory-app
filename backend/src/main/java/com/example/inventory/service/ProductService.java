@@ -1,6 +1,7 @@
 package com.example.inventory.service;
 
 import com.example.inventory.config.InventoryProperties;
+import com.example.inventory.domain.Order;
 import com.example.inventory.domain.Product;
 import com.example.inventory.repository.ProductRepository;
 import com.example.inventory.web.dto.ProductDto;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -44,7 +47,7 @@ public class ProductService {
         Product product = new Product(
                 request.sku().trim(),
                 request.name().trim(),
-                request.price(),
+                normalizePrice(request.price()),
                 request.stockQuantity()
         );
         Product saved = productRepository.save(product);
@@ -57,10 +60,15 @@ public class ProductService {
         Product product = getProduct(id);
         product.setSku(request.sku().trim());
         product.setName(request.name().trim());
-        product.setPrice(request.price());
+        product.setPrice(normalizePrice(request.price()));
         product.setStockQuantity(request.stockQuantity());
         log.info("Updated product id={} sku={}", product.getId(), product.getSku());
         return toDto(product);
+    }
+
+    /** 金額カラムは NUMERIC(12,0)（円単位）なので、保存前に合計計算と同じスケール方針へ丸める。 */
+    private BigDecimal normalizePrice(BigDecimal price) {
+        return price.setScale(Order.AMOUNT_SCALE, RoundingMode.HALF_UP);
     }
 
     private Product getProduct(Long id) {

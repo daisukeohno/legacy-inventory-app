@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createOrder, fetchProducts } from '../api/client'
 import type { Product } from '../api/types'
@@ -11,15 +11,17 @@ export default function OrderCreatePage() {
   const [quantities, setQuantities] = useState<Record<number, string>>({})
   const [message, setMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        setProducts(await fetchProducts('', false))
-      } catch (e) {
-        setMessage(e instanceof Error ? e.message : '商品の取得に失敗しました。')
-      }
-    })()
+  const loadProducts = useCallback(async () => {
+    try {
+      setProducts(await fetchProducts('', false))
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : '商品の取得に失敗しました。')
+    }
   }, [])
+
+  useEffect(() => {
+    void loadProducts()
+  }, [loadProducts])
 
   const lines = useMemo(
     () =>
@@ -50,6 +52,8 @@ export default function OrderCreatePage() {
       navigate('/orders')
     } catch (e) {
       setMessage(e instanceof Error ? e.message : '注文の登録に失敗しました。')
+      // 在庫不足などで失敗したときは最新在庫を表示に反映する。
+      await loadProducts()
     }
   }
 

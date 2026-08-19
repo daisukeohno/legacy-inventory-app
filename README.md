@@ -106,6 +106,14 @@ npm run build && npm run e2e                  # プレビューサーバー(4173
 E2E は商品検索・低在庫フィルタ・商品登録（バリデーション含む）・注文一覧の合計表示・
 新規注文での在庫引き落とし・在庫不足時のエラーをカバーしています。
 
+### CI
+
+`.github/workflows/ci.yml` が push（master）と Pull Request で以下を実行します。
+
+- `backend`: `mvn test`（Testcontainers PostgreSQL 含む）
+- `frontend`: `npm run typecheck` / `npm run lint` / `npm run build`
+- `e2e`: PostgreSQL サービスコンテナ + バックエンド jar 起動 + Playwright
+
 ## 業務ロジック（旧実装からの踏襲）
 
 - 低在庫: `stockQuantity < 10`（しきい値は設定で変更可能）

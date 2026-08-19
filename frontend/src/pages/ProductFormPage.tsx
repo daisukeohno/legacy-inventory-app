@@ -64,8 +64,18 @@ export default function ProductFormPage() {
     })()
   }, [productId])
 
-  const update = (field: keyof FormState) => (value: string) =>
+  const update = (field: keyof FormState) => (value: string) => {
     setForm((current) => ({ ...current, [field]: value }))
+    // 修正した項目のエラー表示は即時に取り下げる。
+    setErrors((current) => {
+      if (current[field] === undefined) {
+        return current
+      }
+      const next = { ...current }
+      delete next[field]
+      return next
+    })
+  }
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()

@@ -31,12 +31,32 @@ export default function OrderCreatePage() {
     [products, quantities],
   )
 
+  /** 空以外で 0 以上の整数として解釈できない数量は黙って無視せず指摘する。 */
+  const invalidQuantityIds = useMemo(
+    () =>
+      products
+        .filter((product) => {
+          const raw = (quantities[product.id] ?? '').trim()
+          if (raw === '') {
+            return false
+          }
+          const quantity = Number(raw)
+          return !Number.isInteger(quantity) || quantity < 0
+        })
+        .map((product) => product.id),
+    [products, quantities],
+  )
+
   const total = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0)
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (customerName.trim() === '') {
       setMessage('得意先名を入力してください。')
+      return
+    }
+    if (invalidQuantityIds.length > 0) {
+      setMessage('数量は0以上の整数で入力してください。')
       return
     }
     if (lines.length === 0) {
@@ -100,6 +120,9 @@ export default function OrderCreatePage() {
                       setQuantities((current) => ({ ...current, [product.id]: e.target.value }))
                     }
                   />
+                  {invalidQuantityIds.includes(product.id) && (
+                    <span className="field-error">0以上の整数で入力してください。</span>
+                  )}
                 </td>
               </tr>
             ))}

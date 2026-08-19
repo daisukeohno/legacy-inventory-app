@@ -53,6 +53,26 @@ test('商品を登録でき、入力不備はエラー表示になる', async ({
   await expect(row.getByTestId('low-stock-badge')).toBeVisible()
 })
 
+test('入力を修正するとその項目のエラー表示は消える', async ({ page }) => {
+  await page.goto('/products/new')
+  await page.getByRole('button', { name: '保存' }).click()
+  await expect(page.getByText('SKUを入力してください。')).toBeVisible()
+
+  await page.getByLabel('SKU').fill('SKU-E2E-VALIDATION')
+  await expect(page.getByText('SKUを入力してください。')).toHaveCount(0)
+  await expect(page.getByText('商品名を入力してください。')).toBeVisible()
+})
+
+test('数量に数値以外を入力すると注文は確定できずエラー表示になる', async ({ page }) => {
+  await page.goto('/orders/new')
+  await page.getByLabel('得意先名').fill('E2E数量不正')
+  await page.getByLabel('外付けSSD 1TB の数量').fill('abc')
+  await page.getByRole('button', { name: '注文を確定' }).click()
+
+  await expect(page.getByTestId('order-error')).toContainText('数量は0以上の整数で入力してください。')
+  await expect(page).toHaveURL(/\/orders\/new$/)
+})
+
 test('注文一覧は明細と合計金額を表示する', async ({ page }) => {
   await page.goto('/orders')
   await expect(page.getByTestId('order-card')).not.toHaveCount(0)

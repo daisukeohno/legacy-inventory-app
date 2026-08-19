@@ -97,6 +97,21 @@ Devinにマイグレーションを依頼した際に「何を・なぜ直した
 まずは移行計画（対象ファイル・作業ステップ・リスク）を提示してください。
 ```
 
+## モダナイズ版 (backend/ + frontend/)
+
+レガシー実装 (`src/`) はそのまま残し、Spring Boot 3 の REST API (`backend/`) と
+Vite + React (TypeScript) の SPA (`frontend/`) を新規に追加している。
+
+```bash
+docker compose up -d                    # PostgreSQL 16 を起動
+(cd backend && mvn spring-boot:run)     # http://localhost:8080 (Flywayでスキーマ+シード投入)
+(cd frontend && npm install && npm run dev)  # http://localhost:5173 (/api を8080へプロキシ)
+```
+
+- DB接続は `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` で上書き可能。H2で動かす場合は
+  `SPRING_PROFILES_ACTIVE=h2`。
+- テスト: `(cd backend && mvn test)` / `(cd frontend && npm run e2e)`
+
 ## 免責事項
 
 本リポジトリはデモ・検証専用のサンプルです。認証・認可、入力値検証、監査ログなど
